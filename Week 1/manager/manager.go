@@ -31,6 +31,7 @@ func Manager(url string, numChunks int) error {
 	if err != nil {
 		return fmt.Errorf("Error getting the paths : %w", err)
 	}
+	fmt.Println("Paths created successfully")
 
 	//Calling Workers
 	wg := sync.WaitGroup{}
@@ -39,6 +40,8 @@ func Manager(url string, numChunks int) error {
 		go worker.Worker(url, chunks[i], paths[i], &wg) //passed st,end,pathToWrite,waitGroup
 	}
 
+	//Waiting for workers
 	wg.Wait()
+
 	return nil
 }
