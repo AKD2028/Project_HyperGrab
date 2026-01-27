@@ -10,38 +10,35 @@ import (
 )
 
 func Manager(url string, numChunks int) error {
-	fmt.Println("Manager has started")
-
-	//Probing
-	result, err := probe.Probe(url) // {result.RangeSupported,Result.FileSize},err
+	//Probing the server
+	result, err := probe.Probe(url) //{FileSize,RangeSupported},err
 	if err != nil {
 		return fmt.Errorf("Error probing the url : %w", err)
 	}
 	if !result.RangeSupported {
 		numChunks = 1
 	}
-	fmt.Println("Probing has succeeded")
 
-	//Getting chunks
+	//Getting the chunks
 	chunks := chunk.CreateChunks(result.FileSize, numChunks) // []Chunk(ID,Start,End)
 	fmt.Println("Chunks created:", len(chunks))
 
-	//Getting filePaths
+	//Getting paths
 	paths, err := paths.PathBuild(numChunks, url) // retuns []string,err
 	if err != nil {
 		return fmt.Errorf("Error getting the paths : %w", err)
 	}
-	fmt.Println("Paths created successfully")
 
-	//Calling Workers
+	//Calling the workers
 	wg := sync.WaitGroup{}
 	for i := 0; i < numChunks; i++ {
 		wg.Add(1)
 		go worker.Worker(url, chunks[i], paths[i], &wg) //passed st,end,pathToWrite,waitGroup
 	}
 
-	//Waiting for workers
+	//Waiting for the workers
 	wg.Wait()
 
 	return nil
+
 }

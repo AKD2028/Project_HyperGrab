@@ -10,7 +10,7 @@ func PathBuild(numchunks int, url_link string) ([]string, error) {
 	//baseDirectory is the folder in which you want you download files to be stored
 
 	u, err := url.Parse(url_link)
-	baseDirectory := "Downloads"
+	baseDirectory := "C:\\Users\\HP\\Downloads"
 
 	if err != nil {
 		return nil, err

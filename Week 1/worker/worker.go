@@ -10,7 +10,7 @@ import (
 )
 
 func Worker(url string, ch chunk.Chunk, filepath string, wg *sync.WaitGroup) {
-
+	defer (*wg).Done()
 	client := &http.Client{}
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -34,7 +34,7 @@ func Worker(url string, ch chunk.Chunk, filepath string, wg *sync.WaitGroup) {
 		n, err := resp.Body.Read(buf)
 
 		if n > 0 {
-			writer.Write(buf[:n], filepath, wg)
+			writer.Write(buf[:n], filepath)
 
 		}
 
