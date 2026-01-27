@@ -13,7 +13,6 @@ type Result struct {
 }
 
 func Probe(url string) (*Result, error) {
-	fmt.Println("1")
 
 	//HEAD
 	req, err := http.NewRequest("HEAD", url, nil)
@@ -21,7 +20,7 @@ func Probe(url string) (*Result, error) {
 
 		return nil, err
 	}
-	fmt.Println("1")
+
 	//Send the request
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -30,13 +29,13 @@ func Probe(url string) (*Result, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	fmt.Println("1")
+
 	//server responded
 	if resp.StatusCode != http.StatusOK {
 		fmt.Printf("%d", resp.StatusCode)
 		return nil, fmt.Errorf("server returned %s", resp.Status)
 	}
-	fmt.Println("1")
+
 	//Content-Length
 	lengthStr := resp.Header.Get("Content-Length")
 	if lengthStr == "" {
@@ -47,7 +46,7 @@ func Probe(url string) (*Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("1")
+
 	//Accept-Range
 	rangeHeader := resp.Header.Get("Accept-Ranges")
 	rangeSupported := (rangeHeader == "bytes")
