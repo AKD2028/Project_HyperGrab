@@ -5,11 +5,13 @@ import (
 	"io"
 	"net/http"
 	"sync"
+
 	"week1/chunk"
+	"week1/progress"
 	"week1/writer"
 )
 
-func Worker(url string, ch chunk.Chunk, filepath string, wg *sync.WaitGroup) {
+func Worker(url string, ch chunk.Chunk, filepath string, tracker *progress.Tracker, wg *sync.WaitGroup) {
 	defer (*wg).Done()
 	client := &http.Client{}
 
@@ -30,11 +32,15 @@ func Worker(url string, ch chunk.Chunk, filepath string, wg *sync.WaitGroup) {
 	defer resp.Body.Close()
 
 	buf := make([]byte, 32*1024) // 32KB buffer
+
 	for {
 		n, err := resp.Body.Read(buf)
 
 		if n > 0 {
 			writer.Write(buf[:n], filepath)
+
+			//update progress
+			tracker.AddProgress(ch.ID-1, int64(n))
 
 		}
 
@@ -47,6 +53,6 @@ func Worker(url string, ch chunk.Chunk, filepath string, wg *sync.WaitGroup) {
 			return
 		}
 	}
-	fmt.Printf("Chunk %d finished downloading\n", ch.ID)
+	fmt.Printf("Chunk %d finished downloading\n\n", ch.ID)
 
 }

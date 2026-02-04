@@ -6,6 +6,7 @@ import (
 	"week1/chunk"
 	"week1/paths"
 	"week1/probe"
+	"week1/progress"
 	"week1/worker"
 )
 
@@ -33,7 +34,18 @@ func Manager(url string, numChunks int) error {
 
 	chunks := chunk.CreateChunks(result.FileSize, numChunks) // []Chunk
 	fmt.Println("✅ Chunks created:", len(chunks))
-	paths, err := paths.PathBuild(numChunks, url) // retuns []string,err
+	//Added now
+	tracker := progress.NewTracker(result.FileSize, len(chunks))
+
+	for i, c := range chunks {
+		size := c.End - c.Start + 1
+		tracker.SetChunkSize(i, size)
+	}
+
+	tracker.Start()
+	//
+
+	partPaths, err := paths.PathBuild(numChunks, url) // retuns []string,err
 	if err != nil {
 		return fmt.Errorf("Error getting the paths : %w", err)
 	}
@@ -41,7 +53,7 @@ func Manager(url string, numChunks int) error {
 	wg := sync.WaitGroup{}
 	for i := 0; i < numChunks; i++ {
 		wg.Add(1)
-		go worker.Worker(url, chunks[i], paths[i], &wg) //passed st,end,pathToWrite,waitGroup
+		go worker.Worker(url, chunks[i], partPaths[i], tracker, &wg) //passed st,end,pathToWrite,waitGroup
 	}
 
 	wg.Wait()
