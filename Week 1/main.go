@@ -28,5 +28,8 @@ func main() {
 
 	//Start HyperGrab
 	fmt.Println("Starting download...")
-	manager.Manager(*url, *chunks)
+	err :=manager.Manager(*url, *chunks)
+	if err!=nil{
+		fmt.Println(err)
+	}
 }

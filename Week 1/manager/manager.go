@@ -8,6 +8,7 @@ import (
 	"week1/probe"
 	"week1/progress"
 	"week1/worker"
+	"week1/input"
 )
 
 func Manager(url string, numChunks int) error {
@@ -42,13 +43,24 @@ func Manager(url string, numChunks int) error {
 
 	//Calling the workers
 	wg := sync.WaitGroup{}
+	Ctrl := worker.Controller{
+		PauseFlag: false,
+		PauseChannel: nil,
+		CancelFlag: false,
+	}
 	for i := 0; i < numChunks; i++ {
 		wg.Add(1)
-		go worker.Worker(url, chunks[i], partPaths[i], tracker, &wg) //passed st,end,pathToWrite,waitGroup
+		go worker.Worker(url, chunks[i], partPaths[i],tracker, &wg,&Ctrl) //passed st,end,pathToWrite,waitGroup
 	}
+
+	go input.GetTerminalInput(&Ctrl)
 
 	//Waiting for the workers
 	wg.Wait()
+
+	Ctrl.CancelFlag=false
+	Ctrl.PauseChannel=nil
+	Ctrl.PauseFlag=false
 
 	return nil
 
