@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 	"week1/chunk"
+	"week1/merger"
 	"week1/paths"
 	"week1/probe"
 	"week1/progress"
@@ -12,8 +13,9 @@ import (
 )
 
 func Manager(url string, numChunks int) error {
-	//Probing the server
-	result, err := probe.Probe(url) //{FileSize,RangeSupported},err
+
+	result, err := probe.Probe(url)
+	fmt.Printf("%s ", url)
 	if err != nil {
 		return fmt.Errorf("Error probing the url : %w", err)
 	}
@@ -22,8 +24,8 @@ func Manager(url string, numChunks int) error {
 	}
 
 	chunks := chunk.CreateChunks(result.FileSize, numChunks) // []Chunk
-	fmt.Println("✅ Chunks created:", len(chunks))
-	//Trcking progress 
+	fmt.Println("Chunks created:", len(chunks))
+	//Added now
 	tracker := progress.NewTracker(result.FileSize, len(chunks))
 
 	for i, c := range chunks {
@@ -32,7 +34,7 @@ func Manager(url string, numChunks int) error {
 	}
 
 	tracker.Start()
-  
+
 	//
 
 	partPaths, err := paths.PathBuild(numChunks, url) // retuns []string,err
@@ -58,9 +60,16 @@ func Manager(url string, numChunks int) error {
 	//Waiting for the workers
 	wg.Wait()
 
+
+	werr := merger.MergeChunks(partPaths, url)
+	if werr != nil {
+		return err
+	}
+
 	Ctrl.CancelFlag=false
 	Ctrl.PauseChannel=nil
 	Ctrl.PauseFlag=false
+
 
 	return nil
 

@@ -14,6 +14,7 @@ func CreateChunks(fileSize int64, numChunks int) []Chunk {
 	var start int64 = 0
 
 	for i := 0; i < numChunks; i++ {
+
 		end := start + chunkSize - 1
 
 		//last chunk takes remaining bytes

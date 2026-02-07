@@ -6,7 +6,6 @@ import (
 	"strconv"
 )
 
-// Result holds metadata about the file
 type Result struct {
 	FileSize       int64
 	RangeSupported bool
@@ -14,7 +13,7 @@ type Result struct {
 
 func Probe(url string) (*Result, error) {
 
-	//HEAD
+	//HEAD-making head request
 	req, err := http.NewRequest("HEAD", url, nil)
 	if err != nil {
 
@@ -25,7 +24,7 @@ func Probe(url string) (*Result, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ HTTP request failed:", err)
+		fmt.Println("HTTP request failed:", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
@@ -42,6 +41,7 @@ func Probe(url string) (*Result, error) {
 	}
 
 	fileSize, err := strconv.ParseInt(lengthStr, 10, 64)
+	//just for safety
 	if err != nil {
 		return nil, err
 	}
