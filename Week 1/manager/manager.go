@@ -11,17 +11,6 @@ import (
 	"week1/worker"
 )
 
-type Result struct {
-	FileSize       int64
-	RangeSupported bool
-}
-
-type Chunk struct {
-	ID    int
-	Start int64
-	End   int64
-}
-
 func Manager(url string, numChunks int) error {
 
 	result, err := probe.Probe(url)
@@ -44,19 +33,23 @@ func Manager(url string, numChunks int) error {
 	}
 
 	tracker.Start()
+
 	//
 
 	partPaths, err := paths.PathBuild(numChunks, url) // retuns []string,err
+
 	if err != nil {
 		return fmt.Errorf("Error getting the paths : %w", err)
 	}
 
+	//Calling the workers
 	wg := sync.WaitGroup{}
 	for i := 0; i < numChunks; i++ {
 		wg.Add(1)
 		go worker.Worker(url, chunks[i], partPaths[i], tracker, &wg) //passed st,end,pathToWrite,waitGroup
 	}
 
+	//Waiting for the workers
 	wg.Wait()
 
 	werr := merger.MergeChunks(partPaths, url)
