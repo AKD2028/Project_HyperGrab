@@ -32,7 +32,6 @@ func Probe(url string) (*Result, error) {
 
 	//server responded
 	if resp.StatusCode != http.StatusOK {
-		fmt.Printf("%d", resp.StatusCode)
 		return nil, fmt.Errorf("server returned %s", resp.Status)
 	}
 

@@ -9,7 +9,13 @@ import (
 	"week1/writer"
 )
 
-func Worker(url string, ch chunk.Chunk, filepath string, wg *sync.WaitGroup) {
+type Controller struct{
+	PauseFlag bool
+	PauseChannel chan struct{}
+	CancelFlag bool
+}
+
+func Worker(url string, ch chunk.Chunk, filepath string, wg *sync.WaitGroup,Ctrl *Controller){
 	defer (*wg).Done()
 	client := &http.Client{}
 
@@ -31,6 +37,17 @@ func Worker(url string, ch chunk.Chunk, filepath string, wg *sync.WaitGroup) {
 
 	buf := make([]byte, 32*1024) // 32KB buffer
 	for {
+		
+		if (Ctrl.PauseFlag){
+			fmt.Printf("Downloading paused for chunk %d\n",ch.ID)
+			<-Ctrl.PauseChannel
+		}
+
+		if (Ctrl.CancelFlag){
+			fmt.Printf("Downloading cancelled for chunk %d\n", ch.ID)
+			return
+		}
+
 		n, err := resp.Body.Read(buf)
 
 		if n > 0 {
@@ -48,5 +65,4 @@ func Worker(url string, ch chunk.Chunk, filepath string, wg *sync.WaitGroup) {
 		}
 	}
 	fmt.Printf("Chunk %d finished downloading\n", ch.ID)
-
 }
