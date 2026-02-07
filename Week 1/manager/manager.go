@@ -10,21 +10,9 @@ import (
 	"week1/worker"
 )
 
-type Result struct {
-	FileSize       int64
-	RangeSupported bool
-}
-
-type Chunk struct {
-	ID    int
-	Start int64
-	End   int64
-}
-
 func Manager(url string, numChunks int) error {
-
-	result, err := probe.Probe(url)
-	fmt.Printf(" %s ", url)
+	//Probing the server
+	result, err := probe.Probe(url) //{FileSize,RangeSupported},err
 	if err != nil {
 		return fmt.Errorf("Error probing the url : %w", err)
 	}
@@ -34,7 +22,7 @@ func Manager(url string, numChunks int) error {
 
 	chunks := chunk.CreateChunks(result.FileSize, numChunks) // []Chunk
 	fmt.Println("✅ Chunks created:", len(chunks))
-	//Added now
+	//Trcking progress 
 	tracker := progress.NewTracker(result.FileSize, len(chunks))
 
 	for i, c := range chunks {
@@ -43,19 +31,23 @@ func Manager(url string, numChunks int) error {
 	}
 
 	tracker.Start()
+  
 	//
 
 	partPaths, err := paths.PathBuild(numChunks, url) // retuns []string,err
+
 	if err != nil {
 		return fmt.Errorf("Error getting the paths : %w", err)
 	}
 
+	//Calling the workers
 	wg := sync.WaitGroup{}
 	for i := 0; i < numChunks; i++ {
 		wg.Add(1)
 		go worker.Worker(url, chunks[i], partPaths[i], tracker, &wg) //passed st,end,pathToWrite,waitGroup
 	}
 
+	//Waiting for the workers
 	wg.Wait()
 
 	return nil

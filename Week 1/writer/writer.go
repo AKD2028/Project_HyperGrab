@@ -13,13 +13,14 @@ type Chunk struct {
 }
 
 func Write(downloadedChunk []byte, filePath string) error {
-
+	//Opening file
 	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		return fmt.Errorf("Error opening the file %v : %w\n", filePath, err)
 	}
 	defer file.Close()
 
+	//Writing to the file
 	written, err := file.Write(downloadedChunk)
 	if err != nil {
 		return fmt.Errorf("Error writing to the file %v : %w\n", filePath, err)
