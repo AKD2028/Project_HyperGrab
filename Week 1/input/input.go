@@ -8,31 +8,31 @@ import (
 	"week1/worker"
 )
 
-func GetTerminalInput(Ctrl *worker.Controller){
+func GetTerminalInput(Ctrl *worker.Controller) {
 
 	fmt.Println("Commands available : [ pause, resume, cancel ]")
 
 	scanner := bufio.NewScanner(os.Stdin)
-	
-	for scanner.Scan(){
+
+	for scanner.Scan() {
 
 		input := strings.TrimSpace(scanner.Text())
 
-		switch input{
+		switch input {
 
-		case "pause" :
-			Ctrl.PauseChannel=make(chan struct{})
-			Ctrl.PauseFlag=true
+		case "pause":
+			Ctrl.PauseChannel = make(chan struct{})
+			Ctrl.PauseFlag = true
 		case "resume":
-			Ctrl.PauseFlag=false
+			Ctrl.PauseFlag = false
 			close(Ctrl.PauseChannel)
-			Ctrl.PauseChannel=nil
+			Ctrl.PauseChannel = nil
 		case "cancel":
-			Ctrl.CancelFlag=true
-			if Ctrl.PauseFlag{
+			Ctrl.CancelFlag = true
+			if Ctrl.PauseFlag {
 				close(Ctrl.PauseChannel)
 			}
-		default : 
+		default:
 			fmt.Println("Cannot identify the command")
 		}
 
