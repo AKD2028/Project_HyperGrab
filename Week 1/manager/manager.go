@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 	"week1/chunk"
+	"week1/merger"
 	"week1/paths"
 	"week1/probe"
 	"week1/progress"
@@ -24,7 +25,7 @@ type Chunk struct {
 func Manager(url string, numChunks int) error {
 
 	result, err := probe.Probe(url)
-	fmt.Printf(" %s ", url)
+	fmt.Printf("%s ", url)
 	if err != nil {
 		return fmt.Errorf("Error probing the url : %w", err)
 	}
@@ -33,7 +34,7 @@ func Manager(url string, numChunks int) error {
 	}
 
 	chunks := chunk.CreateChunks(result.FileSize, numChunks) // []Chunk
-	fmt.Println("✅ Chunks created:", len(chunks))
+	fmt.Println("Chunks created:", len(chunks))
 	//Added now
 	tracker := progress.NewTracker(result.FileSize, len(chunks))
 
@@ -57,6 +58,11 @@ func Manager(url string, numChunks int) error {
 	}
 
 	wg.Wait()
+
+	werr := merger.MergeChunks(partPaths, url)
+	if werr != nil {
+		return err
+	}
 
 	return nil
 
