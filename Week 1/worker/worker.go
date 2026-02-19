@@ -75,12 +75,7 @@ func Worker(url string, ch chunk.Chunk, filepath string, tracker *progress.Track
 			fmt.Println("Connection disrupted")
 			return
 		}
-		//
-
-		// if (Ctrl.PauseFlag){
-		// 	fmt.Printf("Downloading paused for chunk %d\n",ch.ID)
-		// 	<-Ctrl.PauseChannel
-		// }
+		
 
 		
 

@@ -26,6 +26,8 @@ func Manager(url string, numChunks int) error {
 	}
 
 	chunks := chunk.CreateChunks(result.FileSize, numChunks) // []Chunk
+	chunksCopy := make([]chunk.Chunk, len(chunks))
+	copy(chunksCopy, chunks)
 	fmt.Println("Chunks created:", len(chunks))
 	//Added now
 	tracker := progress.NewTracker(result.FileSize, len(chunks))
@@ -36,8 +38,6 @@ func Manager(url string, numChunks int) error {
 	}
 
 	tracker.Start()
-
-	//
 
 	partPaths, err := paths.PathBuild(numChunks, url) // retuns []string,err
 
@@ -58,35 +58,38 @@ func Manager(url string, numChunks int) error {
 	go func() {
 		for tracker.TotalDone < tracker.TotalSize {
 
-		//resuming logic
-		time.Sleep(time.Second)
-		fmt.Println("Trying connection again")
-		req, _ := http.NewRequest("HEAD", url, nil) //blocks without internet
-		client := &http.Client{}
-		_, err := client.Do(req)
-		fmt.Println("Made head request")
-		if err != nil {
-			continue
-		}
-		fmt.Println("Connection is back")
-		//
+			//resuming logic
+			time.Sleep(time.Second)
+			fmt.Println("Trying connection")
+			_,err := http.Head("http://proof.ovh.net/files/100Mb.dat")
+			if err !=nil{
+				continue
+			}
+			fmt.Println("Connection made")
+			//
 
-		for i, chunk := range chunks {
-			chunk.Start += tracker.ChunkDone[i]
+			for i:=0;i<numChunks;i++{
+				chunks[i].Start = chunksCopy[i].Start+tracker.ChunkDone[i]
+			}
+			for i := 0; i < numChunks; i++ {
+				if chunks[i].Start>chunks[i].End{
+					continue
+				}
+				wg.Add(1)
+				fmt.Println("Starting worker for chunk ",i+1)
+				go worker.Worker(url, chunks[i], partPaths[i], tracker, &wg, &Ctrl) //passed st,end,pathToWrite,waitGroup
+			}
+			wg.Wait() //what if only one worker is interrupted ?
+			if Ctrl.CancelFlag{
+				break
+			}
 		}
-		for i := 0; i < numChunks; i++ {
-			wg.Add(1)
-			go worker.Worker(url, chunks[i], partPaths[i], tracker, &wg, &Ctrl) //passed st,end,pathToWrite,waitGroup
-		}
-		wg.Wait()
-		fmt.Println("The workers have returned")
-	}
+		wg2.Done()
 	}()
 
 	go input.GetTerminalInput(&Ctrl)
 
 	//Waiting for the workers
-	wg.Wait()
 	wg2.Wait()
 
 	werr := merger.MergeChunks(partPaths, url)
