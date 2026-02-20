@@ -26,7 +26,11 @@ type ReadResult struct{
 
 func Worker(url string, ch chunk.Chunk, filepath string, tracker *progress.Tracker,wg *sync.WaitGroup,Ctrl *Controller){
 	defer (*wg).Done()
-	client := &http.Client{}
+	client := &http.Client{
+		Transport: &http.Transport{
+			DisableKeepAlives: true,
+		},
+	}
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

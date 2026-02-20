@@ -59,10 +59,18 @@ func Manager(url string, numChunks int) error {
 		for tracker.TotalDone < tracker.TotalSize {
 
 			//resuming logic
-			time.Sleep(time.Second)
+			time.Sleep(time.Second*3)
 			fmt.Println("Trying connection")
-			_,err := http.Head("http://proof.ovh.net/files/100Mb.dat")
+			req,_:= http.NewRequest("HEAD",url,nil)
+			client := &http.Client{
+				Timeout: 5*time.Second,
+				Transport: &http.Transport{
+					DisableKeepAlives: true,
+				},
+			}
+			_,err := client.Do(req)
 			if err !=nil{
+				fmt.Println("No Internet")
 				continue
 			}
 			fmt.Println("Connection made")
