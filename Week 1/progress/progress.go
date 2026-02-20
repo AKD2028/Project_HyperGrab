@@ -37,23 +37,31 @@ func (t *Tracker) AddProgress(id int, n int64) {
 }
 
 // Print progress continuously
-func (t *Tracker) Start() {
+func (t *Tracker) Start(start time.Time) {
 	go func() {
 		for {
+
 			time.Sleep(500 * time.Millisecond)
 
 			t.mu.Lock()
 
 			totalPercent := float64(t.totalDone) / float64(t.totalSize) * 100
+			speed := float64(t.totalDone) / time.Since(start).Seconds()
+			remainingTime := (float64(t.totalSize) - float64(t.totalDone)) / speed
 
-			fmt.Printf("\rTotal: %.1f%% | ", totalPercent)
+			fmt.Printf("\rTotal: %.1f%% ", totalPercent)
+			fmt.Printf("Est Time : %.2f sec | ", remainingTime)
 
 			for i := range t.chunkDone {
+
 				chunkPercent := float64(t.chunkDone[i]) / float64(t.chunkSizes[i]) * 100
 				fmt.Printf("C%d: %.1f%% ", i+1, chunkPercent)
 			}
 
 			t.mu.Unlock()
+
 		}
+
 	}()
+
 }

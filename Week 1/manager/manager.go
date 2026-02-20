@@ -3,16 +3,22 @@ package manager
 import (
 	"fmt"
 	"sync"
+	"time"
 	"week1/chunk"
+	"week1/input"
 	"week1/merger"
 	"week1/paths"
 	"week1/probe"
 	"week1/progress"
 	"week1/worker"
-	"week1/input"
 )
 
 func Manager(url string, numChunks int) error {
+
+	start := time.Now()
+	defer func() {
+		fmt.Println("\nTime taken:", time.Since(start))
+	}()
 
 	result, err := probe.Probe(url)
 	fmt.Printf("%s ", url)
@@ -33,7 +39,7 @@ func Manager(url string, numChunks int) error {
 		tracker.SetChunkSize(i, size)
 	}
 
-	tracker.Start()
+	tracker.Start(start)
 
 	//
 
@@ -46,13 +52,13 @@ func Manager(url string, numChunks int) error {
 	//Calling the workers
 	wg := sync.WaitGroup{}
 	Ctrl := worker.Controller{
-		PauseFlag: false,
+		PauseFlag:    false,
 		PauseChannel: nil,
-		CancelFlag: false,
+		CancelFlag:   false,
 	}
 	for i := 0; i < numChunks; i++ {
 		wg.Add(1)
-		go worker.Worker(url, chunks[i], partPaths[i],tracker, &wg,&Ctrl) //passed st,end,pathToWrite,waitGroup
+		go worker.Worker(url, chunks[i], partPaths[i], tracker, &wg, &Ctrl) //passed st,end,pathToWrite,waitGroup
 	}
 
 	go input.GetTerminalInput(&Ctrl)
@@ -60,16 +66,14 @@ func Manager(url string, numChunks int) error {
 	//Waiting for the workers
 	wg.Wait()
 
-
 	werr := merger.MergeChunks(partPaths, url)
 	if werr != nil {
 		return err
 	}
 
-	Ctrl.CancelFlag=false
-	Ctrl.PauseChannel=nil
-	Ctrl.PauseFlag=false
-
+	Ctrl.CancelFlag = false
+	Ctrl.PauseChannel = nil
+	Ctrl.PauseFlag = false
 
 	return nil
 
