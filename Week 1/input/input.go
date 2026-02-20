@@ -19,14 +19,6 @@ func GetTerminalInput(Ctrl *worker.Controller) {
 		input := strings.TrimSpace(scanner.Text())
 
 		switch input {
-
-<<<<<<< HEAD
-		case "pause":
-			Ctrl.PauseChannel = make(chan struct{})
-			Ctrl.PauseFlag = true
-		case "resume":
-			Ctrl.PauseFlag = false
-=======
 		case "pause" :
 			if Ctrl.PauseFlag{
 				continue
@@ -38,7 +30,6 @@ func GetTerminalInput(Ctrl *worker.Controller) {
 				continue
 			}
 			Ctrl.PauseFlag=false
->>>>>>> c055da0f8f6a05f97c89998d840d415e95caf7c2
 			close(Ctrl.PauseChannel)
 			Ctrl.PauseChannel = nil
 		case "cancel":

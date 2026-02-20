@@ -7,32 +7,32 @@ import (
 )
 
 type Tracker struct {
-	totalSize  int64
-	chunkSizes []int64
-	chunkDone  []int64
-	totalDone  int64
+	TotalSize  int64
+	ChunkSizes []int64
+	ChunkDone  []int64
+	TotalDone  int64
 	mu         sync.Mutex
 }
 
 // Create new tracker
 func NewTracker(totalSize int64, numChunks int) *Tracker {
 	return &Tracker{
-		totalSize:  totalSize,
-		chunkSizes: make([]int64, numChunks),
-		chunkDone:  make([]int64, numChunks),
+		TotalSize:  totalSize,
+		ChunkSizes: make([]int64, numChunks),
+		ChunkDone:  make([]int64, numChunks),
 	}
 }
 
 // Set each chunk's size
 func (t *Tracker) SetChunkSize(id int, size int64) {
-	t.chunkSizes[id] = size
+	t.ChunkSizes[id] = size
 }
 
 // Called by workers when bytes are downloaded
 func (t *Tracker) AddProgress(id int, n int64) {
 	t.mu.Lock()
-	t.chunkDone[id] += n
-	t.totalDone += n
+	t.ChunkDone[id] += n
+	t.TotalDone += n
 	t.mu.Unlock()
 }
 
@@ -45,16 +45,15 @@ func (t *Tracker) Start(start time.Time) {
 
 			t.mu.Lock()
 
-			totalPercent := float64(t.totalDone) / float64(t.totalSize) * 100
-			speed := float64(t.totalDone) / time.Since(start).Seconds()
-			remainingTime := (float64(t.totalSize) - float64(t.totalDone)) / speed
+			totalPercent := float64(t.TotalDone) / float64(t.TotalSize) * 100
+			speed := float64(t.TotalDone) / time.Since(start).Seconds()
+			remainingTime := (float64(t.TotalSize) - float64(t.TotalDone)) / speed
 
 			fmt.Printf("\rTotal: %.1f%% ", totalPercent)
 			fmt.Printf("Est Time : %.2f sec | ", remainingTime)
 
-			for i := range t.chunkDone {
-
-				chunkPercent := float64(t.chunkDone[i]) / float64(t.chunkSizes[i]) * 100
+			for i := range t.ChunkDone {
+				chunkPercent := float64(t.ChunkDone[i]) / float64(t.ChunkSizes[i]) * 100
 				fmt.Printf("C%d: %.1f%% ", i+1, chunkPercent)
 			}
 
