@@ -14,7 +14,7 @@ func MergeChunks(chunkPaths []string, url_link string) error {
 		return fmt.Errorf("Error :%v", err)
 	}
 	fileName := path.Base(u.Path)
-	baseDirectory := "C:\\Users\\HP\\Downloads"
+	baseDirectory := "/home/akdang/Downloads/Test2"
 	filePath := path.Join(baseDirectory, fileName)
 
 	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, 0644)

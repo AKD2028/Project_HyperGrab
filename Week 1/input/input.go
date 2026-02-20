@@ -21,9 +21,15 @@ func GetTerminalInput(Ctrl *worker.Controller){
 		switch input{
 
 		case "pause" :
+			if Ctrl.PauseFlag{
+				continue
+			}
 			Ctrl.PauseChannel=make(chan struct{})
 			Ctrl.PauseFlag=true
 		case "resume":
+			if !Ctrl.PauseFlag{
+				continue
+			}
 			Ctrl.PauseFlag=false
 			close(Ctrl.PauseChannel)
 			Ctrl.PauseChannel=nil
