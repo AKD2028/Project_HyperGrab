@@ -10,8 +10,9 @@ import (
 func main() {
 
 	//Command-line
+
 	url := flag.String("url", "", "File URL to download")
-	chunks := flag.Int("chunks", 4, "Number of parts to split into")
+	// chunks := flag.Int("chunks", 4, "Number of parts to split into")
 
 	flag.Parse()
 
@@ -21,12 +22,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	if *chunks <= 0 {
-		fmt.Println("Error: chunks must be greater than 0")
-		os.Exit(1)
-	}
+	// if *chunks <= 0 {
+	// 	fmt.Println("Error: chunks must be greater than 0")
+	// 	os.Exit(1)
+	// }
 
 	//Start HyperGrab
 	fmt.Println("Starting download...")
-	manager.Manager(*url, *chunks)
+	// err := manager.Manager(*url, *chunks)
+	err := manager.Manager(*url)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
