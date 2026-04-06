@@ -125,7 +125,7 @@ function Browser() {
                         <span className="w-3 h-3 rounded-full bg-[#febc2e]" />
                         <span className="w-3 h-3 rounded-full bg-[#28c840]" />
                     </div>
-                    <span className="text-[#7a9fd4] text-xs font-bold  tracking-widest uppercase ml-2">Multi-threaded Downloader</span>
+                    <span className="text-[#7a9fd4] text-xs font-bold  tracking-widest uppercase ml-2">HyperGrab - Multi-threaded Downloader</span>
                 </div>
 
                 {/* Body */}
