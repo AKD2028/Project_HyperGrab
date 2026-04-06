@@ -7,7 +7,7 @@ function Home() {
     const [showCursor, setShowCursor] = useState(true)
     const [glowPulse, setGlowPulse] = useState(false)
 
-    const headline = "Multi-Threaded Downloader"
+    const headline = "HyperGrab - Multi-Threaded Downloader"
 
     // Typewriter effect
     useEffect(() => {
