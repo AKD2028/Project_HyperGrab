@@ -51,8 +51,8 @@ func Manager(url string, numChunks int, appCtx context.Context, baseDirectory st
 	}
 
 	//Calling the workers
-	wg := sync.WaitGroup{}
-	wg2 := sync.WaitGroup{}
+	wg := sync.WaitGroup{}  // for the workers
+	wg2 := sync.WaitGroup{}	// for the main downloading go routine
 	wgTracker := sync.WaitGroup{}
 	Ctrl := worker.Controller{
 		PauseFlag:    false,
